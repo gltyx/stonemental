@@ -25,6 +25,7 @@ const UPGRADES = {
                     },
                     eff(i) {
                         let base = E(1.5).add(upgEffect('stone',1,0))
+                        if (upgBought('gold',5)) base = base.add(upgEffect('gold',5,0))
                         let x = base.pow(i)
                         return [base,x]
                     },
@@ -123,11 +124,11 @@ const UPGRADES = {
                     title: `Hard Miner`,
                     desc: _=>`Increase ${tmp.t_stoneName} gain by <b>${upgEffect('t_stone',0)[0].format(2)}x</b>.`,
                     cost(i) {
-                        let x = Decimal.pow(3,i.pow(1.1)).mul(100)
+                        let x = Decimal.pow(3,i.scale(100,2,0).pow(1.1)).mul(100)
                         return x.ceil()
                     },
                     bulk(i) {
-                        let x = i.div(100).max(1).log(3).max(0).root(1.1)
+                        let x = i.div(100).max(1).log(3).max(0).root(1.1).scale(100,2,0,true)
                         return x.add(1).floor()
                     },
                     eff(i) {
@@ -138,15 +139,15 @@ const UPGRADES = {
                     effDesc(x) { return x[1].format(2) + 'x' },
                 },{
                     type: 1,
-                    max: 5,
+                    max: _=> 5+upgEffect('t_stone',5,0),
                     title: `Harder Miner`,
                     desc: `Increase <b>Hard Miner</b>'s base by <b>0.2</b>.`,
                     cost(i) {
-                        let x = Decimal.pow(10,i.pow(1.5)).mul(1000)
+                        let x = Decimal.pow(10,i.scale(5,1.5,0).pow(1.5)).mul(1000)
                         return x.ceil()
                     },
                     bulk(i) {
-                        let x = i.div(1000).max(1).log(10).max(0).root(1.5)
+                        let x = i.div(1000).max(1).log(10).max(0).root(1.5).scale(5,1.5,0,true)
                         return x.add(1).floor()
                     },
                     eff(i) {
@@ -172,11 +173,11 @@ const UPGRADES = {
                     title: `Flurry Stone`,
                     desc: _=>`Decrease ${tmp.t_stoneName}'s strength by <b>0.2</b>.`,
                     cost(i) {
-                        let x = Decimal.pow(1e3,i).mul(1e6)
+                        let x = Decimal.pow(1e3,i.scale(20,2,0)).mul(1e6)
                         return x.ceil()
                     },
                     bulk(i) {
-                        let x = i.div(1e6).max(1).log(1e3)
+                        let x = i.div(1e6).max(1).log(1e3).scale(20,2,0,true)
                         return x.add(1).floor()
                     },
                     eff(i) {
@@ -190,6 +191,23 @@ const UPGRADES = {
                     keep: true,
                     desc: `<b>Stone's Tiered Boost</b> is sightly stronger. Keep this upgrade on Tiered Quarry entered.`,
                     cost: E(1e21),
+                },{
+                    unl: _=> player.t_stone.tier >= 21,
+                    type: 1,
+                    desc: _=>`Increase <b>Harder Miner</b>'s maxmium level by <b>1</b>.`,
+                    cost(i) {
+                        let x = Decimal.pow(1e2,i.pow(1.25)).mul(1e24)
+                        return x.ceil()
+                    },
+                    bulk(i) {
+                        let x = i.div(1e24).max(1).log(1e2).max(0).root(1.25)
+                        return x.add(1).floor()
+                    },
+                    eff(i) {
+                        let x = i
+                        return x.toNumber()
+                    },
+                    effDesc(x) { return "+"+format(x,0)+" maxmium level" },
                 },
             ],
         },
@@ -248,6 +266,26 @@ const UPGRADES = {
                         `You unlocked <b>Auto-Stone Upgrades</b> & <b>Auto-Tiered Stone Upgrades</b>, bulked Stone & Tiered Stone Upgrades.`
                     ][upgAmount("gold",3)],
                     cost: [E(1e3),E(1e4),E(1e5)],
+                },{
+                    type: 0,
+                    title: `Golden Deep`,
+                    desc: `Increase Golden Stone gain based on highest Quarry Tier reached.`,
+                    cost: E(1e18),
+                    eff(i) {
+                        let x = Decimal.pow(1.2,player.t_stone.max-1)
+                        return x
+                    },
+                    effDesc(x) { return x.format(2)+"x" },
+                },{
+                    type: 0,
+                    title: `Golden Miner`,
+                    desc: `Golden Stone's effect increases <b>Miner</b>'s base at a severely reduced rate.`,
+                    cost: E(1e21),
+                    eff(i) {
+                        let x = tmp.goldEffect?tmp.goldEffect.max(1).log10().root(2).div(10):E(0)
+                        return x
+                    },
+                    effDesc(x) { return "+"+x.format(2) },
                 },
             ],
         },
@@ -344,25 +382,25 @@ function resetUpgrades(id,reset) {
     }
 }
 
-function getUpgradeCost(plr,upg,b=0) {
+function getUpgradeCost(plr,upg,max,b=0) {
     let type = upg.type
     switch (type) {
         case 0: // Simple
             return upg.cost
         case 1: // Advanced
-            return plr.sub(b).gte(upg.max||EINF) ? EINF : upg.cost(plr.sub(b))
+            return plr.sub(b).gte(max||EINF) ? EINF : upg.cost(plr.sub(b))
         case 2: // Custom
             return plr-b >= upg.cost.length ? EINF : upg.cost[plr-b]
     }
 }
 
-function bulkUpgrade(res,upg) {
+function bulkUpgrade(res,upg,max) {
     let type = upg.type
     switch (type) {
         case 0: // Simple
             return res.gte(upg.cost) ? 1 : 0
         case 1: // Advanced
-            return res.gte(upg.cost(E(0))) ? upg.bulk(res).min(upg.max||EINF) : E(0)
+            return res.gte(upg.cost(E(0))) ? upg.bulk(res).min(max||EINF) : E(0)
         case 2: // Custom
             let x = upg.cost.length
             for (let i = 0; i < x; i++) if (res.lt(upg.cost[i])) return i;
@@ -389,8 +427,9 @@ function updateUpgradesTemp(id) {
     for (let y = 0; y < upgs.ctn.length; y++) {
         let upg = upgs.ctn[y]
 
-        tu.cost[y] = getUpgradeCost(pu[y],upg)
-        tu.bulk[y] = bulkUpgrade(tu.res,upg)
+        if (upg.max) tu.max[y] = typeof upg.max === 'function' ? upg.max() : upg.max
+        tu.cost[y] = getUpgradeCost(pu[y],upg,tu.max[y])
+        tu.bulk[y] = bulkUpgrade(tu.res,upg,tu.max[y])
         if (upg.eff) tu.eff[y] = upg.eff(pu[y])
     }
 }

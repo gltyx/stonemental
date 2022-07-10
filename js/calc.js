@@ -15,4 +15,6 @@ function calc(dt) {
     }
 
     tmp.time += dt
+
+    document.getElementById("theme_css").href = player.options.theme != "normal" ? "theme/"+player.options.theme+".css" : ""
 }

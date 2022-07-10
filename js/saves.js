@@ -14,6 +14,9 @@ function getPlayerData() {
             stone: E(0),
             total: E(0),
         },
+        options: {
+            theme: 'normal'
+        },
     }
     for (let x in UPGRADES.ids) {
         let ss = []
@@ -179,6 +182,7 @@ function loadGame(start=true, gotNaN=false) {
     wipe()
     resetTemp()
     load(tmp.prevSave)
+    document.getElementById("theme_css").href = player.options.theme != "normal" ? "theme/"+player.options.theme+".css" : ""
     
     if (start) {
         setInterval(save,60000)

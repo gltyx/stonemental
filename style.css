@@ -48,6 +48,19 @@ h3 {
     flex-flow: row wrap;
 }
 
+.select_div {
+    display: inline;
+    background-color: #eee;
+    border: outset 3px grey;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.select_div > select {
+    width: 150px;
+    text-align-last: left;
+}
+
 #game {
     border: 2px solid black;
     border-radius: 4px;
@@ -62,7 +75,6 @@ h3 {
 }
 
 #news {
-    color: #000000;
     /*transition: transform 1s;*/
     position: relative;
     display: inline-block;
@@ -207,6 +219,7 @@ button.locked {
     font-size: 20px;
     animation: notify 6s cubic-bezier(0.33, 1, 0.68, 1);
     text-align: right;
+    color: black;
 }
 
 .notify_div.success {

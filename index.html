@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/stone.png">
     <link rel="stylesheet" href="style.css">
+    <link id="theme_css" rel="stylesheet" href="">
     <title>Stone-emental</title>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
@@ -60,7 +61,15 @@
                     <button onclick="exporty()">Export Game</button>
                     <button onclick="if (confirm('Are you sure you want to wipe your game?')) wipe(true)">Wipe Game</button>
                     <br><br>
-                    Stone-emental Prototype - Made by MrRedShark77
+                    <div class="select_div">
+                        Theme: 
+                        <select v-model="player.options.theme">
+                            <option value="normal">Normal</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <br><br>
+                    Stone-emental Prototype v0.1 - Made by MrRedShark77
                 </div><div v-if="tmp.tab == 'gold'">
                     You have <h3>{{ player.gold.stone.format(0) }}</h3> Golden Stone.<br>
                     You have {{ player.gold.total.format(0) }} total Golden Stone, which boosts Stone & Tiered Stone gain by <h3>{{formatMult(tmp.goldEffect,2)}}</h3>.<br><br>

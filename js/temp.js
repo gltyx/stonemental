@@ -14,6 +14,7 @@ function resetTemp() {
     }
     for (let x in UPGRADES.ids) tmp.upgs[x] = {
         res: E(0),
+        max: [],
         cost: [],
         bulk: [],
         eff: [],

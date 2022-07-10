@@ -12,6 +12,7 @@ function updateNewsArray() {
         [_=>"IronStone? More like FeStone :D",player.t_stone.max >= 7,"b5"],
         [_=>"BREAKING THE DIAMOND??? WTFFFFF",player.t_stone.max >= 14,"b6"],
         [_=>"Finally, it made of bedrock...",player.t_stone.max >= 15,"b7"],
+        [_=>"Nevermind, bedrock...",player.t_stone.max >= 20,"b8"],
 
         [_=>"Gold made in [Au]stralia!",player.gold.unl,"c1"],
         [_=>"Richer than Trillionaire",player.gold.total.gte(1e6),"c2"],

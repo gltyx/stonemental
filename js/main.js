@@ -14,7 +14,8 @@ const MAIN = {
     },
 
     t_stone: {
-        tiers: [null,'Sandstone','Andesite','Diorite','Granite','Prismarine','Basalt','Ironstone','Cobalt','Obsidian','Quartz','Titanium','Topaz','Ruby','Diamond','w-BN'],
+        tiers: ['','Sandstone','Andesite','Diorite','Granite','Prismarine','Basalt','Ironstone','Cobalt','Obsidian','Quartz','Titanium','Topaz','Ruby','Diamond','w-BN','Lonsdaleite','Neutronium','Strange Matter','Unobtainium','Bedrock'],
+        tiers2: ['','Super ','Hyper ','Ultra ','Meta-','Exo-','Power-','Omega ','Final ','Total '],
 
         gain() {
             let x = E(1)
@@ -60,6 +61,7 @@ const MAIN = {
             if (x.lt(1)) return E(0)
 
             x = x.root(3)
+            if (upgBought('gold',4)) x = x.mul(upgEffect('gold',4))
 
             return x.floor()
         },
@@ -73,7 +75,12 @@ const MAIN = {
     },
 }
 
-function getStoneTierName(i) { return i > MAIN.t_stone.tiers.length-1 ? format(i,0) + "-Tiered Stone" : MAIN.t_stone.tiers[i] }
+const TST = MAIN.t_stone.tiers.length-1
+const TST2 = MAIN.t_stone.tiers2.length
+
+function getStoneTierName(i) {
+    return i > TST*TST2 ? format(i,0) + "-Tiered Stone" : MAIN.t_stone.tiers2[Math.floor((i-1)/TST)] + MAIN.t_stone.tiers[(i-1)%TST+1]
+}
 
 function updateTSTemp() {
     tmp.t_stoneGain = MAIN.t_stone.gain()

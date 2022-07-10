@@ -33,13 +33,13 @@ function loadVue() {
         props: ["id","idx","ctn",'tu','res'],
         template: `
         <div class="upg_div">
-            <button class="upg_btn" v-if="ctn.unl ? ctn.unl() : true" :class="{locked: tu.res.lt(tu.cost[idx]), bought: ctn.type === 0 ? player.upgs[id][idx] : ctn.type === 1 ? player.upgs[id][idx].gte(ctn.max||EINF) : player.upgs[id][idx] >= ctn.cost.length}" @click="buyUpgrade(id,idx)">
+            <button class="upg_btn" v-if="ctn.unl ? ctn.unl() : true" :class="{locked: tu.res.lt(tu.cost[idx]), bought: ctn.type === 0 ? player.upgs[id][idx] : ctn.type === 1 ? player.upgs[id][idx].gte(tu.max[idx]||EINF) : player.upgs[id][idx] >= ctn.cost.length}" @click="buyUpgrade(id,idx)">
                 <div>
                     <b>{{ ctn.title }}</b>
-                    <div style="min-height: 15px"><span v-if="ctn.type > 0">Level {{ format(player.upgs[id][idx],0) }}<span v-if="ctn.max || ctn.type === 2"> / {{ format(ctn.type === 1 ? ctn.max : ctn.cost.length,0) }}</span></span></div>
+                    <div style="min-height: 15px"><span v-if="ctn.type > 0">Level {{ format(player.upgs[id][idx],0) }}<span v-if="tu.max[idx] || ctn.type === 2"> / {{ format(ctn.type === 1 ? format(tu.max[idx],0) : ctn.cost.length,0) }}</span></span></div>
                     <div style="min-height: 60px" v-html="typeof ctn.desc === 'function' ? ctn.desc() : ctn.desc"></div>
                     <div v-if="ctn.effDesc">Effect: <span v-html="ctn.effDesc(tmp.upgs[id].eff[idx])"></span></div>
-                    <div v-if="ctn.type === 0 ? !player.upgs[id][idx] : ctn.type === 1 ? player.upgs[id][idx].lt(ctn.max||EINF) : player.upgs[id][idx] < ctn.cost.length">Cost: {{ tmp.upgs[id].cost[idx].format(0) }} {{ res }}</div>
+                    <div v-if="ctn.type === 0 ? !player.upgs[id][idx] : ctn.type === 1 ? player.upgs[id][idx].lt(tu.max[idx]||EINF) : player.upgs[id][idx] < ctn.cost.length">Cost: {{ tmp.upgs[id].cost[idx].format(0) }} {{ res }}</div>
                 </div>
             </button>
         </div>

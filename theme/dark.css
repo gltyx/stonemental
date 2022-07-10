@@ -1,0 +1,44 @@
+body {
+    background-color: hsl(0, 0%, 7%);
+	color: white;
+}
+
+button {
+    background-color: #444;
+    border-color: #666;
+    color: white;
+}
+
+#game {
+    border-color: white;
+}
+
+#news {
+    color: white;
+}
+
+.select_div {
+    background-color: #444;
+    border-color: #666;
+}
+
+.upg_btn.bought {
+    border-color: #1e801e;
+    background-color: #186618;
+}
+
+.upg_btn:not(.bought).locked,
+.reset_btn.locked,
+button.locked {
+    background-color: #222;
+}
+
+.tab_btn_tooltip {
+    background-color: #444;
+    border-color: #666;
+}
+
+.auto_div > div {
+    background-color: #444;
+    border-color: #666;
+}
