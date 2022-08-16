@@ -1,0 +1,116 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/stone.png">
+    <link rel="stylesheet" href="style.css">
+    <link id="theme_css" rel="stylesheet" href="">
+    <title>石头增量 - Stone-emental</title>
+
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.12/vue.min.js"></script>
+    <script src="js/break_eternity.js"></script>
+    <script src="js/format.js"></script>
+    <script src="js/saves.js"></script>
+    <script src="js/temp.js"></script>
+
+    <script src="js/module/other.js"></script>
+    <script src="js/module/newsticker.js"></script>
+    <script src="js/module/upgrades.js"></script>
+    <script src="js/module/resets.js"></script>
+    <script src="js/module/auto.js"></script>
+    <script src="js/module/tabs.js"></script>
+
+    <script src="js/calc.js"></script>
+    <script src="js/main.js"></script>
+
+    <script src="js/vue.js"></script>
+</head>
+<body onload="loadGame()">
+    <script src="chs.js"></script>
+    <script src="core.js"></script>
+    <div id="app" style="display: none">
+        <input id="copy" style="position: absolute; top: 0; left: 0; user-select: all; visibility: hidden;">
+        <div id="notify"></div>
+
+        <div id="game"><div id="news"></div></div>
+
+        <div style="height: calc(100% - 34px);" class="table_center">
+            <div style="width: 75px;">
+                <div v-for="x in TABS.tab_id" class="tab_btn_div">
+                    <tab :id="x" :ctn="TABS.tab[x]" :req="TABS.tab[x].req ? TABS.tab[x].req() : true"></tab>
+                </div>
+            </div><div style="width: calc(100% - 150px); height: 100%; overflow-y: auto;">
+                You have mined <h3>{{ player.stone.format(0) }}</h3> {{ player.stone.formatGain(tmp.stoneGain,1) }} Stone.<br><br>
+                <div v-if="tmp.tab == 'stone'">
+                    <div v-if="player.t_stone.unl">
+                        You have mined <h3>{{ player.t_stone.stone.format(0) }}</h3> {{ player.t_stone.stone.formatGain(tmp.t_stoneDiffGain,2) }} 
+                        {{ tmp.t_stoneName }}, 
+                        which is <h3>{{ tmp.t_stoneHard.format(2) }}x</h3> harder than Stone.<br>
+                        <div class="table_center" style="align-items: center;">
+                            <button onclick="MAIN.t_stone.switch(-1)" :class="{locked: player.t_stone.tier == 1}">←</button>
+                            <div style="width: 250px;">Quarry Tier {{ format(player.t_stone.tier,0) }} / {{ format(player.t_stone.max,0) }}</div>
+                            <button onclick="MAIN.t_stone.switch(1)" :class="{locked: player.t_stone.tier >= player.t_stone.max}">→</button>
+                        </div>
+                        New Quarry Tier at <h3>{{ tmp.t_stoneNext.format(2) }}</h3> {{ getStoneTierName(player.t_stone.max) }}.
+                    </div><br>
+                    <upgrades id="stone"></upgrades>
+                    <upgrades v-if="player.t_stone.unl" id="t_stone"></upgrades>
+                </div><div v-if="tmp.tab == 'options'">
+                    <button onclick="save()">Save Game</button>
+                    <button onclick="export_copy()">Export to Clipboard</button>
+                    <button onclick="importy()">Import Game</button>
+                    <button onclick="exporty()">Export Game</button>
+                    <button onclick="if (confirm('Are you sure you want to wipe your game?')) wipe(true)">Wipe Game</button>
+                    <br><br>
+                    <div class="select_div">
+                        Theme: 
+                        <select v-model="player.options.theme">
+                            <option value="normal">Normal</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <br><br>
+                    Stone-emental Prototype v0.1 - Made by MrRedShark77
+                </div><div v-if="tmp.tab == 'gold'">
+                    You have <h3>{{ player.gold.stone.format(0) }}</h3> Golden Stone.<br>
+                    You have {{ player.gold.total.format(0) }} total Golden Stone, which boosts Stone & Tiered Stone gain by <h3>{{formatMult(tmp.goldEffect,2)}}</h3>.<br><br>
+                    <reset id="gold"></reset><br>
+                    <upgrades v-if="player.gold.unl" id="gold"></upgrades>
+                </div><div v-if="tmp.tab == 'auto'">
+                    To unlock any machine, you need to bought upgrade or made anything...<br><br>
+                    <div class="table_center">
+                        <div class="auto_div" v-for="x in AUTO_ID">
+                            <div v-if="AUTO[x].unl()">
+                                <h3>{{ AUTO[x].title }}</h3><br><br>
+                                Enabled: <input type="checkbox" v-model="player.auto[x]"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><div style="width: 75px;">
+                
+            </div>
+        </div>
+
+        <div style="display:none">{{ tmp.time }}</div>
+    </div>
+<!--客服 开始-->
+<script src="//g8hh.github.io/static/js/jquery.min.js"></script>
+<link rel="stylesheet" href="//g8hh.github.io/static/css/kf.css" type="text/css" media="screen" charset="utf-8">
+<script src="//g8hh.github.io/static/js/kf.js"></script>
+<!-- 客服 结束 -->
+<!--站长统计-->
+<div style="display: none">
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?6581389daf4dd6fe7dbb4d20fdcb52a6";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+        </div>
+</body>
+</html>
