@@ -86,7 +86,7 @@ var cnItems = {
     "Increase Super Andesite gain by": "将超级安山岩增益增加",
     "Increase the exponent from Golden Stone's effect by": "金石效果的指数增加",
     "is": "是",
-    "is affected by": "受到影响",
+    "is affected by": "受影响来自",
     "is sightly stronger. Keep this upgrade on Tiered Quarry entered.": "明显更强。 保持此升级进入分层采石场。",
     "New Tiered Quarry's requirement is": "新分层采石场的要求是",
     "Newble Automation": "新宝自动化",
