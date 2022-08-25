@@ -8,7 +8,7 @@ const MAIN = {
 
         x = x.mul(upgEffect('stone',0)[1])
         if (upgBought('t_stone',2)) x = x.mul(upgEffect('t_stone',2))
-        x = x.mul(tmp.goldEffect)
+        x = x.mul(tmp.goldEffect).mul(tmp.pickEffect)
 
         return x
     },
@@ -23,13 +23,17 @@ const MAIN = {
             x = x.mul(upgEffect('t_stone',0)[1])
             x = x.mul(upgEffect('stone',2)[1])
             x = x.mul(upgEffect('stone',3))
-            x = x.mul(tmp.goldEffect)
+            x = x.mul(tmp.goldEffect).mul(tmp.pickEffect)
 
             return x
         },
 
         hard() {
-            let x = Decimal.pow(Math.max(player.t_stone.tier-upgEffect('t_stone',3,0),0),2).div(100).add(1)
+            let t = player.t_stone.tier
+
+            if (upgBought('t_stone',6)) t *= upgEffect('t_stone',6,1)
+
+            let x = Decimal.pow(Math.max(t-upgEffect('t_stone',3,0),0),2).div(100).add(1)
 
             return x
         },
@@ -62,6 +66,7 @@ const MAIN = {
 
             x = x.root(3)
             if (upgBought('gold',4)) x = x.mul(upgEffect('gold',4))
+            if (upgBought('gold',6)) x = x.mul(tmp.pickEffect)
 
             return x.floor()
         },
@@ -73,6 +78,46 @@ const MAIN = {
             return x
         },
     },
+
+    break: {
+        gain() {
+            let x = player.stone.div(1e100)
+            if (x.lt(1)) return E(0)
+
+            x = x.div(1e5).root(15).add(1)
+
+            return x.floor()
+        },
+
+        xpGain() {
+            let x = upgEffect('break',1)
+
+            x = x.mul(upgEffect('gold',7))
+            if (upgBought('break',2)) x = x.mul(upgEffect('break',2))
+
+            return x
+        },
+
+        nextTier() {
+            let t = E(player.break.tier).scale(60,1.5,0)
+            let x = Decimal.pow(2,t.sub(1).pow(1.25)).mul(100)
+
+            return x
+        },
+
+        bulkTier() {
+            if (player.break.xp.lt(100)) return 1
+            let x = player.break.xp.div(100).max(1).log(2).root(1.25).add(1).scale(60,1.5,0,true).floor().toNumber()+1
+
+            return x
+        },
+
+        effect() {
+            let x = Decimal.pow(2,player.break.tier-1)
+
+            return x
+        },
+    }
 }
 
 const TST = MAIN.t_stone.tiers.length-1
@@ -97,6 +142,12 @@ tmp_update.push(_=>{
     updateTSTemp()
     tmp.goldGain = MAIN.gold.gain()
     tmp.goldEffect = MAIN.gold.effect()
+
+    tmp.cobsGain = MAIN.break.gain()
+    tmp.xpGain = MAIN.break.xpGain()
+    tmp.bulkPickTier = MAIN.break.bulkTier()
+    tmp.nextPickTier = MAIN.break.nextTier()
+    tmp.pickEffect = MAIN.break.effect()
 })
 
 function loop() {

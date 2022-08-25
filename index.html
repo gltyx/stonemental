@@ -27,7 +27,7 @@
     <script src="js/vue.js"></script>
 </head>
 <body onload="loadGame()">
-    <div id="app" style="display: none">
+    <div id="app">
         <input id="copy" style="position: absolute; top: 0; left: 0; user-select: all; visibility: hidden;">
         <div id="notify"></div>
 
@@ -69,9 +69,9 @@
                         </select>
                     </div>
                     <br><br>
-                    Stone-emental Prototype v0.1 - Made by MrRedShark77
+                    Stone-emental Prototype v0.2 - Made by MrRedShark77
                 </div><div v-if="tmp.tab == 'gold'">
-                    You have <h3>{{ player.gold.stone.format(0) }}</h3> Golden Stone.<br>
+                    You have <h3>{{ player.gold.stone.format(0) }}</h3><span v-if="player.auto.passive_gold"> {{ player.gold.stone.formatGain(tmp.goldGain,1) }}</span> Golden Stone.<br>
                     You have {{ player.gold.total.format(0) }} total Golden Stone, which boosts Stone & Tiered Stone gain by <h3>{{formatMult(tmp.goldEffect,2)}}</h3>.<br><br>
                     <reset id="gold"></reset><br>
                     <upgrades v-if="player.gold.unl" id="gold"></upgrades>
@@ -84,6 +84,15 @@
                                 Enabled: <input type="checkbox" v-model="player.auto[x]"></span>
                             </div>
                         </div>
+                    </div>
+                </div><div v-if="tmp.tab == 'cobs'">
+                    You have broken <h3>{{ player.break.stone.format(0) }}</h3> Cobblestone.<br><br>
+                    <reset id="break"></reset><br>
+                    <div v-if="player.break.unl">
+                        You have skilled with <h3>{{ player.break.xp.format(1) }}</h3> / <h3>{{ tmp.nextPickTier.format(1) }}</h3> {{ player.break.xp.formatGain(tmp.xpGain,1) }} Experience Points (XP).<br>
+                        Pickaxe's Tier <h3>{{ format(player.break.tier,0) }}</h3> - {{ getStoneTierName(player.break.tier) }} Pickaxe.<br>
+                        Provides a <h3>{{ formatMult(tmp.pickEffect,2) }}</h3> boost of Stone & Tiered Stone.<br><br>
+                        <upgrades id="break"></upgrades>
                     </div>
                 </div>
             </div><div style="width: 75px;">

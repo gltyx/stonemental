@@ -1,9 +1,11 @@
 const RESETS = {
     resource: { // important! player.test -> [player, "test"] - ['object that change resource inside it','that resource']
         gold: _=> [player.gold, "stone"],
+        break: _=> [player.break, "stone"],
     },
     resGain: {
         gold: _=> tmp.goldGain,
+        break: _=> tmp.cobsGain,
     },
     canReset(id) {
         let r = this.ids[id], gain = this.resGain[id]()
@@ -20,6 +22,8 @@ const RESETS = {
             r.doReset()
 
             updateTemp()
+
+            tmp.pass = false
         }
     },
     ids: {
@@ -39,6 +43,23 @@ const RESETS = {
 
                 resetUpgrades('stone')
                 resetUpgrades('t_stone')
+            },
+        },
+        break: {
+            reqDesc: _=> `Reach <b>${format(1e100)}</b> Stone to break.`,
+            gainDesc: x=> `Break your Stone into <b>${x.format(0)}</b> Cobblestone.`,
+            resetDesc: `Breaking stone resets everything golden stone as well except stone automation.`,
+            onReset(gain) {
+                player.break.unl = true
+                player.break.total = player.break.total.add(gain)
+            },
+            doReset() {
+                player.gold.stone = E(0)
+                player.gold.total = E(0)
+
+                resetUpgrades('gold','break')
+                
+                RESETS.ids.gold.doReset()
             },
         },
     },

@@ -5,12 +5,15 @@ function resetTemp() {
     keep = [tmp.prevSave]
 
     tmp = {
+        pass: true,
+
         time: 0,
         upgs: {},
         tab: "stone",
         stab: {},
 
         prevSave: "",
+        theme: "normal",
     }
     for (let x in UPGRADES.ids) tmp.upgs[x] = {
         res: E(0),
