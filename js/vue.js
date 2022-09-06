@@ -19,7 +19,7 @@ function loadVue() {
             AUTO,
         },
     })
-
+    
     Vue.component('upgrades',{
         props: ["id"],
         template: `

@@ -14,6 +14,13 @@ function getPlayerData() {
             stone: E(0),
             total: E(0),
         },
+        break: {
+            unl: false,
+            stone: E(0),
+            total: E(0),
+            xp: E(0),
+            tier: 1,
+        },
         options: {
             theme: 'normal'
         },

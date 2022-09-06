@@ -3,6 +3,7 @@ const UPGRADES = {
         stone: _=> [player, "stone"],
         t_stone: _=> [player.t_stone, "stone"],
         gold: _=> [player.gold, "stone"],
+        break: _=> [player.break, "stone"],
     },
 
     ids: {
@@ -24,6 +25,7 @@ const UPGRADES = {
                         return x.add(1).floor()
                     },
                     eff(i) {
+                        if (upgBought('break',0)) i = i.mul(1.1)
                         let base = E(1.5).add(upgEffect('stone',1,0))
                         if (upgBought('gold',5)) base = base.add(upgEffect('gold',5,0))
                         let x = base.pow(i)
@@ -32,7 +34,7 @@ const UPGRADES = {
                     effDesc(x) { return x[1].format(1) + 'x' },
                 },{
                     type: 1,
-                    max: 5,
+                    max: _=> 5+upgEffect('stone',6,0),
                     title: `Better Miner`,
                     desc: `Increase <b>Miner</b>'s base by <b>0.15</b>.`,
                     cost(i) {
@@ -44,6 +46,7 @@ const UPGRADES = {
                         return x.add(1).floor()
                     },
                     eff(i) {
+                        if (upgBought('break',0)) i = i.mul(1.1)
                         let x = i.mul(0.15)
                         return x
                     },
@@ -111,6 +114,23 @@ const UPGRADES = {
                         return x.add(1)
                     },
                     effDesc(x) { return x.format(2)+"x" },
+                },{
+                    unl: _=> player.t_stone.max >= 23,
+                    type: 1,
+                    desc: `Increase <b>Better Miner</b>'s maximum level by <b>1</b>.`,
+                    cost(i) {
+                        let x = Decimal.pow(1e10,i.pow(2)).mul(1e130)
+                        return x.ceil()
+                    },
+                    bulk(i) {
+                        let x = i.div(1e130).max(1).log(1e10).max(0).root(2)
+                        return x.add(1).floor()
+                    },
+                    eff(i) {
+                        let x = i.toNumber()
+                        return x
+                    },
+                    effDesc(x) { return "+"+format(x,0)+" maximum level" },
                 },
             ],
         },
@@ -194,7 +214,7 @@ const UPGRADES = {
                 },{
                     unl: _=> player.t_stone.tier >= 21,
                     type: 1,
-                    desc: _=>`Increase <b>Harder Miner</b>'s maxmium level by <b>1</b>.`,
+                    desc: _=>`Increase <b>Harder Miner</b>'s maximum level by <b>1</b>.`,
                     cost(i) {
                         let x = Decimal.pow(1e2,i.pow(1.25)).mul(1e24)
                         return x.ceil()
@@ -207,12 +227,25 @@ const UPGRADES = {
                         let x = i
                         return x.toNumber()
                     },
-                    effDesc(x) { return "+"+format(x,0)+" maxmium level" },
+                    effDesc(x) { return "+"+format(x,0)+" maximum level" },
+                },{
+                    title: `Flurr-stoned Stone`,
+                    unl: _=> player.t_stone.tier >= 26,
+                    type: 0,
+                    keep: true,
+                    desc: `${tmp.t_stoneName}'s strength is weaker by Stone at a severly reduced rate. Keep this upgrade on Tiered Quarry entered.`,
+                    cost: E(1e37),
+                    eff(i) {
+                        let x = player.stone.add(1).log10().root(3).div(50).add(1).pow(-1)
+                        return x.toNumber()
+                    },
+                    effDesc(x) { return formatReduction(x)+" weaker" },
                 },
             ],
         },
         gold: {
             resDisplay: "Golden Stone",
+            bulk: _=> upgAmount('break',3)>=2,
 
             ctn: [
                 {
@@ -259,6 +292,7 @@ const UPGRADES = {
                 },{
                     type: 2,
                     title: `Newble Automation`,
+                    keep: true,
                     desc: _=> [
                         `Unlock <b>Auto-Stone Upgrades</b>.`,
                         `Unlock <b>Auto-Tiered Stone Upgrades</b>.`,
@@ -286,6 +320,81 @@ const UPGRADES = {
                         return x
                     },
                     effDesc(x) { return "+"+x.format(2) },
+                },{
+                    unl: _=>player.break.unl,
+                    keep: true,
+                    type: 0,
+                    desc: `Pickaxe Tier affects Golden Stone gain. Keep this upgrade on breaking stone.`,
+                    cost: E(1e36),
+                },{
+                    unl: _=>player.break.unl,
+                    type: 1,
+                    title: `Golden XP`,
+                    desc: _=>`Increase XP gain by <b>${formatMult(player.gold.total.add(1).log10().add(1),2)}</b> (based on OoM of total Golden Stone).`,
+                    cost(i) {
+                        let x = Decimal.pow(10,i.pow(1.3)).mul(1e75)
+                        return x.ceil()
+                    },
+                    bulk(i) {
+                        let x = i.div(1e75).max(1).log(10).max(0).root(1.3)
+                        return x.add(1).floor()
+                    },
+                    eff(i) {
+                        let x = player.gold.total.add(1).log10().add(1).pow(i)
+                        return x
+                    },
+                    effDesc(x) { return formatMult(x,2) },
+                },
+            ],
+        },
+        break: {
+            resDisplay: "Cobblestone",
+
+            ctn: [
+                {
+                    type: 0,
+                    title: `Miner Starter`,
+                    desc: `<b>Miner</b> & <b>Better Miner</b> are <b>10%</b> stronger.`,
+                    cost: E(1),
+                },{
+                    max: 10,
+                    type: 1,
+                    title: `Stone XP`,
+                    desc: `XP is boosted based on your Stone.`,
+                    cost(i) {
+                        let x = Decimal.pow(2.5,i.pow(1.5)).mul(10)
+                        return x.ceil()
+                    },
+                    bulk(i) {
+                        let x = i.div(10).max(1).log(2.5).max(0).root(1.5)
+                        return x.add(1).floor()
+                    },
+                    eff(i) {
+                        let x = player.stone.add(1).log10().add(1).pow(i)
+                        return x
+                    },
+                    effDesc(x) { return formatMult(x,2) },
+                },{
+                    type: 0,
+                    title: `Tiered Stone XP`,
+                    desc: `XP is boosted based on your tiered Stone.`,
+                    cost: E(1e4),
+                    eff(i) {
+                        let x = player.t_stone.stone.pow(tmp.t_stoneHard).add(1).log10().add(1).pow(player.t_stone.max/5+1)
+                        return x
+                    },
+                    effDesc(x) { return formatMult(x,2) },
+                },{
+                    type: 2,
+                    title: `Beginner Automation`,
+                    keep: true,
+                    desc: _=> [
+                        `Unlock <b>Auto-Enter Quarry</b>.`,
+                        `Unlock <b>Auto-Golden Stone Upgrades</b>, you can now bulk Golden Stone Upgrades.`,
+                        `Passively generate 10% of Golden Stone gained on reset.`,
+                        `You unlocked <b>Auto-Enter Quarry</b> & <b>Auto-Golden Stone Upgrades</b>, bulked Golden Stone Upgrades, passively generated 10% of Golden Stone.`
+                    ][upgAmount("break",3)],
+                    cost: [E(5e5),E(2.5e6),E(1e7)],
                 },
             ],
         },
@@ -378,6 +487,7 @@ function resetUpgrades(id,reset) {
         let ctn = UPGRADES.ids[id].ctn[y]
         let keep = false
         if (reset == "quarry" && id == "t_stone") keep = ctn.keep
+        if (reset == "break" && id == "gold") keep = ctn.keep
         if (!keep) player.upgs[id][y] = ctn.type === 1 ? E(0) : 0
     }
 }
