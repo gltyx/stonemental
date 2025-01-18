@@ -4,22 +4,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/stone.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
     <link id="theme_css" rel="stylesheet" href="">
     <title>Stone-emental</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="js/vue.min.js"></script>
     <script src="js/break_eternity.js"></script>
     <script src="js/format.js"></script>
     <script src="js/saves.js"></script>
     <script src="js/temp.js"></script>
+    <script src="js/mods.js"></script>
+    <script src="js/changelogs.js"></script>
 
     <script src="js/module/other.js"></script>
+    <script src="js/module/formulas.js"></script>
     <script src="js/module/newsticker.js"></script>
-    <script src="js/module/upgrades.js"></script>
-    <script src="js/module/resets.js"></script>
+    <script src="js/module/currencies.js"></script>
     <script src="js/module/auto.js"></script>
     <script src="js/module/tabs.js"></script>
+
+    <script src="js/features/break.js"></script>
+
+    <script src="js/module/upgrades.js"></script>
+    <script src="js/module/resets.js"></script>
 
     <script src="js/calc.js"></script>
     <script src="js/main.js"></script>
@@ -35,32 +42,34 @@
 
         <div style="height: calc(100% - 34px);" class="table_center">
             <div style="width: 75px;">
-                <div v-for="x in TABS.tab_id" class="tab_btn_div">
-                    <tab :id="x" :ctn="TABS.tab[x]" :req="TABS.tab[x].req ? TABS.tab[x].req() : true"></tab>
+                <div v-for="x in TABS" class="tab_btn_div">
+                    <tab :data="Array.isArray(x.stab) ? x : Object.assign(TAB_DATA[x.stab],{index:x.index})" :stab="false"></tab>
+                </div>
+            </div><div style="width: 75px;">
+                <div v-if="Array.isArray(TABS[tmp.tab].stab)">
+                    <div v-for="x in TABS[tmp.tab].stab.length" class="tab_btn_div">
+                        <tab :data="Object.assign(TAB_DATA[TABS[tmp.tab].stab[x-1]],{index:x-1})" :tab_index="TABS[tmp.tab].index" :stab="true"></tab>
+                    </div>
                 </div>
             </div><div style="width: calc(100% - 150px); height: 100%; overflow-y: auto;">
-                You have mined <h3>{{ player.stone.format(0) }}</h3> {{ player.stone.formatGain(tmp.stoneGain,1) }} Stone.<br><br>
-                <div v-if="tmp.tab == 'stone'">
+                You have mined <h3>{{ player.stone.format(0) }}</h3> {{ player.stone.formatGain(tmp.currency_gain.stone) }} Stone.<br><br>
+                <div v-if="tmp.current_tab == 'stone'">
                     <div v-if="player.t_stone.unl">
-                        You have mined <h3>{{ player.t_stone.stone.format(0) }}</h3> {{ player.t_stone.stone.formatGain(tmp.t_stoneDiffGain,2) }} 
+                        You have mined <h3>{{ player.t_stone.stone.format(0) }}</h3> {{ player.t_stone.stone.formatGain(tmp.t_stoneDiffGain) }} 
                         {{ tmp.t_stoneName }}, 
-                        which is <h3>{{ tmp.t_stoneHard.format(2) }}x</h3> harder than Stone.<br>
+                        which is <h3>{{ formatMult(tmp.t_stoneHard,3) }}</h3> harder than Stone.<br>
                         <div class="table_center" style="align-items: center;">
-                            <button onclick="MAIN.t_stone.switch(-1)" :class="{locked: player.t_stone.tier == 1}">←</button>
+                            <button onclick="MAIN.t_stone.switch(-1)" :class="{locked: player.t_stone.tier.eq(1)}">←</button>
                             <div style="width: 250px;">Quarry Tier {{ format(player.t_stone.tier,0) }} / {{ format(player.t_stone.max,0) }}</div>
-                            <button onclick="MAIN.t_stone.switch(1)" :class="{locked: player.t_stone.tier >= player.t_stone.max}">→</button>
+                            <button onclick="MAIN.t_stone.switch(1)" :class="{locked: player.t_stone.tier.gte(player.t_stone.max)}">→</button>
                         </div>
-                        New Quarry Tier at <h3>{{ tmp.t_stoneNext.format(2) }}</h3> {{ getStoneTierName(player.t_stone.max) }}.
+                        Next Quarry Tier at <h3>{{ tmp.t_stoneNext.format() }}</h3> {{ getStoneTierName(player.t_stone.max) }}.
                     </div><br>
+
                     <upgrades id="stone"></upgrades>
                     <upgrades v-if="player.t_stone.unl" id="t_stone"></upgrades>
-                </div><div v-if="tmp.tab == 'options'">
-                    <button onclick="save()">Save Game</button>
-                    <button onclick="export_copy()">Export to Clipboard</button>
-                    <button onclick="importy()">Import Game</button>
-                    <button onclick="exporty()">Export Game</button>
-                    <button onclick="if (confirm('Are you sure you want to wipe your game?')) wipe(true)">Wipe Game</button>
-                    <br><br>
+                </div>
+                <div v-if="tmp.current_tab == 'options'">
                     <div class="select_div">
                         Theme: 
                         <select v-model="player.options.theme">
@@ -69,34 +78,66 @@
                         </select>
                     </div>
                     <br><br>
-                    Stone-emental Prototype v0.2 - Made by MrRedShark77
-                </div><div v-if="tmp.tab == 'gold'">
-                    You have <h3>{{ player.gold.stone.format(0) }}</h3><span v-if="player.auto.passive_gold"> {{ player.gold.stone.formatGain(tmp.goldGain,1) }}</span> Golden Stone.<br>
-                    You have {{ player.gold.total.format(0) }} total Golden Stone, which boosts Stone & Tiered Stone gain by <h3>{{formatMult(tmp.goldEffect,2)}}</h3>.<br><br>
-                    <reset id="gold"></reset><br>
+                    Stone-emental v1.0 - Made by MrRedShark77
+                </div>
+                <div v-if="tmp.current_tab == 'gold'">
+                    <div>You have <h3>{{ player.gold.stone.format(0) }}</h3><span v-if="isAutomationEnabled('passive_gold')"> {{ player.gold.stone.formatGain(tmp.currency_gain.gold) }}</span> Golden Stone.</div>
+                    <div>You have {{ player.gold.total.format(0) }} total Golden Stone, which boosts Stone & Tiered Stone by <h3>{{formatMult(tmp.gold_effect)}}</h3>.</div>
+                    <reset id="gold"></reset>
                     <upgrades v-if="player.gold.unl" id="gold"></upgrades>
-                </div><div v-if="tmp.tab == 'auto'">
-                    To unlock any machine, you need to bought upgrade or made anything...<br><br>
+                </div>
+                <div v-if="tmp.current_tab == 'auto'">
+                    <p>To unlock any automation, you should purchase any automation upgrades.</p>
                     <div class="table_center">
-                        <div class="auto_div" v-for="x in AUTO_ID">
-                            <div v-if="AUTO[x].unl()">
-                                <h3>{{ AUTO[x].title }}</h3><br><br>
-                                Enabled: <input type="checkbox" v-model="player.auto[x]"></span>
-                            </div>
+                        <div class="auto_div" v-for="x in AUTO_ID" v-if="AUTO[x].unl()">
+                            <div style="min-height: 50px;"><b>{{ AUTO[x].title }}</b></div>
+                            <div>Enabled: <input type="checkbox" v-model="player.auto[x]"></div>
                         </div>
                     </div>
-                </div><div v-if="tmp.tab == 'cobs'">
-                    You have broken <h3>{{ player.break.stone.format(0) }}</h3> Cobblestone.<br><br>
+                </div><div v-if="tmp.current_tab == 'cobble'">
+                    <div>You have broken <h3>{{ player.break.stone.format(0) }}</h3> Cobblestone.</div>
                     <reset id="break"></reset><br>
                     <div v-if="player.break.unl">
-                        You have skilled with <h3>{{ player.break.xp.format(1) }}</h3> / <h3>{{ tmp.nextPickTier.format(1) }}</h3> {{ player.break.xp.formatGain(tmp.xpGain,1) }} Experience Points (XP).<br>
-                        Pickaxe's Tier <h3>{{ format(player.break.tier,0) }}</h3> - {{ getStoneTierName(player.break.tier) }} Pickaxe.<br>
-                        Provides a <h3>{{ formatMult(tmp.pickEffect,2) }}</h3> boost of Stone & Tiered Stone.<br><br>
+                        <div>Your wealth is <h3>${{ format(player.break.money) }}</h3> {{ player.break.money.formatGain(tmp.currency_gain.money) }}.</div>
+                        <div class="table_center">
+                            <div style="width: 50%;">
+                                <div>You have hired <h3>{{ tmp.miners.format(0) }}</h3> miners.</div>
+                                <div>Increases your income by <h3>{{ formatMult(tmp.miner_effect) }}</h3>.</div>
+                            </div><div style="width: 50%;">
+                                <div>Pickaxe's Tier <h3>{{ tmp.pickaxe_tier.format(0) }}</h3> - {{ getStoneTierName(tmp.pickaxe_tier) }} Pickaxe.</div>
+                                <div>Provides a <h3>{{ formatMult(tmp.pickaxe_tier_effect) }}</h3> boost to Stone and Tiered Stone.</div>
+                            </div>
+                        </div>
+                        <upgrades id="money"></upgrades>
                         <upgrades id="break"></upgrades>
                     </div>
                 </div>
-            </div><div style="width: 75px;">
-                
+                <div v-if="tmp.current_tab == 'saving'">
+                    <div>
+                        <button onclick="save()">Save Game</button>
+                        <button onclick="importy()">Import Game</button>
+                        <button onclick="export_copy()">Export to Clipboard</button>
+                        <button onclick="exporty()">Export Game</button>
+                        <button onclick="if (confirm('Are you sure you want to wipe your game?')) wipe(true)">Wipe Game</button>
+                    </div><br><div>
+                        <button onclick="createSaveSlot()">Create Save</button>
+                    </div>
+                    <div class="table_center">
+                        <save-slot v-for="x in SAVE_SLOT.length" :index="x"></save-slot>
+                    </div>
+                </div>
+                <div v-if="tmp.current_tab == 'mods'">
+                    <div>
+                        <button onclick="createModdedSave()">Start the new Normal/Modified Game</button>
+                    </div><br><div>
+                        <modifier-slot v-for="x in MOD_KEYS" :id="x"></modifier-slot>
+                    </div>
+                </div>
+                <div v-if="tmp.current_tab == 'changelogs'">
+                    <div>
+                        <changelog-slot v-for="x in CHANGELOGS.length" :id="x-1"></changelog-slot>
+                    </div>
+                </div>
             </div>
         </div>
 

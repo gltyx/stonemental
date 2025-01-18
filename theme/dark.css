@@ -1,10 +1,10 @@
 body {
-    background-color: hsl(0, 0%, 7%);
+    background: hsl(0, 0%, 7%);
 	color: white;
 }
 
 button {
-    background-color: #444;
+    background: #444;
     border-color: #666;
     color: white;
 }
@@ -17,28 +17,38 @@ button {
     color: white;
 }
 
+.line {
+	border-top-color: white;
+}
+
+.sub-line {
+	border-top-color: #fff2;
+}
+
 .select_div {
-    background-color: #444;
+    background: #444;
     border-color: #666;
 }
 
-.upg_btn.bought {
+button.bought {
     border-color: #1e801e;
-    background-color: #186618;
+    background: #186618;
 }
 
-.upg_btn:not(.bought).locked,
-.reset_btn.locked,
-button.locked {
-    background-color: #222;
+button:not(.bought).locked {
+    cursor: not-allowed;
+    background: #222;
 }
 
-.tab_btn_tooltip {
-    background-color: #444;
+.o-upgrade-btn--id {
+    color: #fff8;
+}
+
+.tab_btn_tooltip,.save-slot,.auto_div,.modifier-slot,.changelog-slot {
+    background: #444;
     border-color: #666;
 }
 
-.auto_div > div {
-    background-color: #444;
-    border-color: #666;
+subtitle {
+    color: #fff8;
 }

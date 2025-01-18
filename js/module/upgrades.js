@@ -1,551 +1,560 @@
 const UPGRADES = {
-    resource: { // important! player.test -> [player, "test"] - ['object that change resource inside it','that resource']
-        stone: _=> [player, "stone"],
-        t_stone: _=> [player.t_stone, "stone"],
-        gold: _=> [player.gold, "stone"],
-        break: _=> [player.break, "stone"],
-    },
+    'stone\\1': {
+        name: `Miner`,
 
-    ids: {
-        stone: {
-            resDisplay: "Stone",
-            bulk: _=> upgAmount('gold',3)>=3,
-
-            ctn: [
-                {
-                    type: 1,
-                    title: `Miner`,
-                    desc: _=>`Increase Stone gain by <b>${upgEffect('stone',0)[0].format(2)}x</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(2,i.pow(1.2)).mul(10)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(10).max(1).log(2).max(0).root(1.2)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        if (upgBought('break',0)) i = i.mul(1.1)
-                        let base = E(1.5).add(upgEffect('stone',1,0))
-                        if (upgBought('gold',5)) base = base.add(upgEffect('gold',5,0))
-                        let x = base.pow(i)
-                        return [base,x]
-                    },
-                    effDesc(x) { return x[1].format(1) + 'x' },
-                },{
-                    type: 1,
-                    max: _=> 5+upgEffect('stone',6,0),
-                    title: `Better Miner`,
-                    desc: `Increase <b>Miner</b>'s base by <b>0.15</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(10,i.pow(1.5)).mul(100)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(100).max(1).log(10).max(0).root(1.5)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        if (upgBought('break',0)) i = i.mul(1.1)
-                        let x = i.mul(0.15)
-                        return x
-                    },
-                    effDesc(x) { return "+"+x.format(2)+'x' },
-                },{
-                    type: 1,
-                    title: `Deep Miner`,
-                    unl: _=> player.t_stone.unl,
-                    desc: _=> `Increase ${tmp.t_stoneName} gain by <b>${upgEffect('stone',2)[0].format(2)}x</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(5,i.pow(1.1)).mul(2e4)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(2e4).max(1).log(5).max(0).root(1.1)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let base = E(3)
-                        if (upgBought("gold",0)) base = base.add(upgEffect('t_stone',1,0))
-                        let x = base.pow(i)
-                        return [base,x]
-                    },
-                    effDesc(x) { return x[1].format(2)+'x' },
-                },{
-                    type: 1,
-                    title: `Tiered Miner`,
-                    unl: _=> player.t_stone.max >= 2,
-                    desc: _=> `${tmp.t_stoneName} gain is boosted based on Quarry Tier you mined.`,
-                    cost(i) {
-                        let x = Decimal.pow(3,i.pow(2)).mul(1e5)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1e5).max(1).log(3).max(0).root(2)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        if (upgBought('stone',4)) i = i.mul(1.5)
-                        let x = Decimal.pow(player.t_stone.tier+1,i)
-                        return x
-                    },
-                    effDesc(x) { return x.format(2)+'x' },
-                },{
-                    unl: _=> player.t_stone.max >= 11,
-                    type: 0,
-                    desc: `<b>Tiered Miner</b> is <b>50%</b> stronger.`,
-                    cost: E(1e30),
-                },{
-                    unl: _=> player.t_stone.max >= 18,
-                    type: 1,
-                    max: 10,
-                    title: `Synergism Miner`,
-                    desc: `<b>Hard Miner</b>'s base is multiplied by <b>33.3%</b> (additive).`,
-                    cost(i) {
-                        let x = Decimal.pow(100,i.pow(1.5)).mul(1e66)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1e66).max(1).log(100).max(0).root(1.5)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = i.div(3)
-                        return x.add(1)
-                    },
-                    effDesc(x) { return x.format(2)+"x" },
-                },{
-                    unl: _=> player.t_stone.max >= 23,
-                    type: 1,
-                    desc: `Increase <b>Better Miner</b>'s maximum level by <b>1</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(1e10,i.pow(2)).mul(1e130)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1e130).max(1).log(1e10).max(0).root(2)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = i.toNumber()
-                        return x
-                    },
-                    effDesc(x) { return "+"+format(x,0)+" maximum level" },
-                },
-            ],
-        },
-        t_stone: {
-            resDisplay: _=> tmp.t_stoneName,
-            bulk: _=> upgAmount('gold',3)>=3,
-
-            ctn: [
-                {
-                    type: 1,
-                    title: `Hard Miner`,
-                    desc: _=>`Increase ${tmp.t_stoneName} gain by <b>${upgEffect('t_stone',0)[0].format(2)}x</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(3,i.scale(100,2,0).pow(1.1)).mul(100)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(100).max(1).log(3).max(0).root(1.1).scale(100,2,0,true)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let base = E(2).add(upgEffect('t_stone',1,0)).mul(upgEffect('stone',5))
-                        let x = base.pow(i)
-                        return [base,x]
-                    },
-                    effDesc(x) { return x[1].format(2) + 'x' },
-                },{
-                    type: 1,
-                    max: _=> 5+upgEffect('t_stone',5,0),
-                    title: `Harder Miner`,
-                    desc: `Increase <b>Hard Miner</b>'s base by <b>0.2</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(10,i.scale(5,1.5,0).pow(1.5)).mul(1000)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1000).max(1).log(10).max(0).root(1.5).scale(5,1.5,0,true)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = i.mul(0.2)
-                        return x
-                    },
-                    effDesc(x) { return "+"+x.format(2)+'x' },
-                },{
-                    unl: _=> player.t_stone.tier >= 3 || upgBought('t_stone',2),
-                    type: 0,
-                    keep: true,
-                    title: `Stone's Tiered Boost`,
-                    desc: _=>`Stone gain is increased based on ${tmp.t_stoneName}. Keep this upgrade on Tiered Quarry entered.`,
-                    cost: E(1e5),
-                    eff(i) {
-                        let x = player.t_stone.stone.add(1).pow(tmp.t_stoneHard).log10().add(1).pow(player.t_stone.tier**(upgBought('t_stone',4)?0.825:0.75))
-                        return x
-                    },
-                    effDesc(x) { return x.format(2)+'x' },
-                },{
-                    unl: _=> player.t_stone.tier >= 8,
-                    type: 1,
-                    title: `Flurry Stone`,
-                    desc: _=>`Decrease ${tmp.t_stoneName}'s strength by <b>0.2</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(1e3,i.scale(20,2,0)).mul(1e6)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1e6).max(1).log(1e3).scale(20,2,0,true)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = i.div(5)
-                        return x.toNumber()
-                    },
-                    effDesc(x) { return "-"+format(x,1)+" to Quarry Tier" },
-                },{
-                    unl: _=> player.t_stone.tier >= 16 || upgBought('t_stone',4),
-                    type: 0,
-                    keep: true,
-                    desc: `<b>Stone's Tiered Boost</b> is sightly stronger. Keep this upgrade on Tiered Quarry entered.`,
-                    cost: E(1e21),
-                },{
-                    unl: _=> player.t_stone.tier >= 21,
-                    type: 1,
-                    desc: _=>`Increase <b>Harder Miner</b>'s maximum level by <b>1</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(1e2,i.pow(1.25)).mul(1e24)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1e24).max(1).log(1e2).max(0).root(1.25)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = i
-                        return x.toNumber()
-                    },
-                    effDesc(x) { return "+"+format(x,0)+" maximum level" },
-                },{
-                    title: `Flurr-stoned Stone`,
-                    unl: _=> player.t_stone.tier >= 26,
-                    type: 0,
-                    keep: true,
-                    desc: `${tmp.t_stoneName}'s strength is weaker by Stone at a severly reduced rate. Keep this upgrade on Tiered Quarry entered.`,
-                    cost: E(1e37),
-                    eff(i) {
-                        let x = player.stone.add(1).log10().root(3).div(50).add(1).pow(-1)
-                        return x.toNumber()
-                    },
-                    effDesc(x) { return formatReduction(x)+" weaker" },
-                },
-            ],
-        },
-        gold: {
-            resDisplay: "Golden Stone",
-            bulk: _=> upgAmount('break',3)>=2,
-
-            ctn: [
-                {
-                    type: 0,
-                    title: `Golden Deep`,
-                    desc: `<b>Deep Miner</b> is affected by <b>Harder Miner</b>.`,
-                    cost: E(1),
-                },{
-                    type: 1,
-                    max: 10,
-                    title: `Strong Golden Effect`,
-                    desc: _=>`Increase the exponent from Golden Stone's effect by <b>1</b>.`,
-                    cost(i) {
-                        let x = Decimal.pow(10,i.pow(1.25)).mul(10)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(10).max(1).log(10).max(0).root(1.25)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = i.div(1)
-                        return x
-                    },
-                    effDesc(x) { return "+^"+x.format(1) },
-                },{
-                    type: 1,
-                    max: 10,
-                    title: `Weak Quarry`,
-                    desc: _=>`New Tiered Quarry's requirement is <b>3%</b> weaker.`,
-                    cost(i) {
-                        let x = Decimal.pow(2,i.pow(1.25)).mul(1000)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1000).max(1).log(2).max(0).root(1.25)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = 1-i.mul(0.03).toNumber()
-                        return x
-                    },
-                    effDesc(x) { return formatReduction(x,1)+" weaker" },
-                },{
-                    type: 2,
-                    title: `Newble Automation`,
-                    keep: true,
-                    desc: _=> [
-                        `Unlock <b>Auto-Stone Upgrades</b>.`,
-                        `Unlock <b>Auto-Tiered Stone Upgrades</b>.`,
-                        `You can now bulk Stone & Tiered Stone Upgrades.`,
-                        `You unlocked <b>Auto-Stone Upgrades</b> & <b>Auto-Tiered Stone Upgrades</b>, bulked Stone & Tiered Stone Upgrades.`
-                    ][upgAmount("gold",3)],
-                    cost: [E(1e3),E(1e4),E(1e5)],
-                },{
-                    type: 0,
-                    title: `Golden Deep`,
-                    desc: `Increase Golden Stone gain based on highest Quarry Tier reached.`,
-                    cost: E(1e18),
-                    eff(i) {
-                        let x = Decimal.pow(1.2,player.t_stone.max-1)
-                        return x
-                    },
-                    effDesc(x) { return x.format(2)+"x" },
-                },{
-                    type: 0,
-                    title: `Golden Miner`,
-                    desc: `Golden Stone's effect increases <b>Miner</b>'s base at a severely reduced rate.`,
-                    cost: E(1e21),
-                    eff(i) {
-                        let x = tmp.goldEffect?tmp.goldEffect.max(1).log10().root(2).div(10):E(0)
-                        return x
-                    },
-                    effDesc(x) { return "+"+x.format(2) },
-                },{
-                    unl: _=>player.break.unl,
-                    keep: true,
-                    type: 0,
-                    desc: `Pickaxe Tier affects Golden Stone gain. Keep this upgrade on breaking stone.`,
-                    cost: E(1e36),
-                },{
-                    unl: _=>player.break.unl,
-                    type: 1,
-                    title: `Golden XP`,
-                    desc: _=>`Increase XP gain by <b>${formatMult(player.gold.total.add(1).log10().add(1),2)}</b> (based on OoM of total Golden Stone).`,
-                    cost(i) {
-                        let x = Decimal.pow(10,i.pow(1.3)).mul(1e75)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(1e75).max(1).log(10).max(0).root(1.3)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = player.gold.total.add(1).log10().add(1).pow(i)
-                        return x
-                    },
-                    effDesc(x) { return formatMult(x,2) },
-                },
-            ],
-        },
-        break: {
-            resDisplay: "Cobblestone",
-
-            ctn: [
-                {
-                    type: 0,
-                    title: `Miner Starter`,
-                    desc: `<b>Miner</b> & <b>Better Miner</b> are <b>10%</b> stronger.`,
-                    cost: E(1),
-                },{
-                    max: 10,
-                    type: 1,
-                    title: `Stone XP`,
-                    desc: `XP is boosted based on your Stone.`,
-                    cost(i) {
-                        let x = Decimal.pow(2.5,i.pow(1.5)).mul(10)
-                        return x.ceil()
-                    },
-                    bulk(i) {
-                        let x = i.div(10).max(1).log(2.5).max(0).root(1.5)
-                        return x.add(1).floor()
-                    },
-                    eff(i) {
-                        let x = player.stone.add(1).log10().add(1).pow(i)
-                        return x
-                    },
-                    effDesc(x) { return formatMult(x,2) },
-                },{
-                    type: 0,
-                    title: `Tiered Stone XP`,
-                    desc: `XP is boosted based on your tiered Stone.`,
-                    cost: E(1e4),
-                    eff(i) {
-                        let x = player.t_stone.stone.pow(tmp.t_stoneHard).add(1).log10().add(1).pow(player.t_stone.max/5+1)
-                        return x
-                    },
-                    effDesc(x) { return formatMult(x,2) },
-                },{
-                    type: 2,
-                    title: `Beginner Automation`,
-                    keep: true,
-                    desc: _=> [
-                        `Unlock <b>Auto-Enter Quarry</b>.`,
-                        `Unlock <b>Auto-Golden Stone Upgrades</b>, you can now bulk Golden Stone Upgrades.`,
-                        `Passively generate 10% of Golden Stone gained on reset.`,
-                        `You unlocked <b>Auto-Enter Quarry</b> & <b>Auto-Golden Stone Upgrades</b>, bulked Golden Stone Upgrades, passively generated 10% of Golden Stone.`
-                    ][upgAmount("break",3)],
-                    cost: [E(5e5),E(2.5e6),E(1e7)],
-                },
-            ],
-        },
-        /* ID Template
-        test: {
-            resDisplay: "Test Points",
-
-            ctn: [
-
-            ],
-        },
-        */
-
-        /* Upgrade Template
-
-            Simple
-        {
-            type: 0,
-            desc: `Placeholder`,
-            cost: E(100),
-        },
-
-            Advanced
-        {
-            type: 1,
-            max: 100,
-            desc: `Placeholder`,
-            cost(i) {
-                let x = E(1)
-                return x.ceil()
-            },
-            bulk(i) {
-                let x = E(0)
-                return x.add(1).floor()
-            },
-        },
-
-            Custom
-        {
-            type: 2,
-            desc: `Placeholder`,
-            cost: [E(1),E(2),E(100),E(1e100)],
-        },
-
-            + Effect (optional)
-                Simple
-            eff() {
-                let x = E(1)
-                return x
-            },
-                Advanced/Custom
-            eff(i) {
-                let x = E(1)
-                return x
-            },
-
-            effDesc(x) { return x.format() + 'x' },
-        */
-    },
-}
-
-const UPG_IDS = Object.keys(UPGRADES.ids)
-
-function buyUpgrade(id,i) {
-    let ctn = UPGRADES.ids[id].ctn[i]
-
-    if (ctn.unl ? !ctn.unl() : false) return;
-
-    let [p, q] = UPGRADES.resource[id]()
-    let tu = tmp.upgs[id]
-    let upgs = player.upgs[id]
-    
-    if (p[q].gte(tu.cost[i]) && Decimal.gt(tu.bulk[i],upgs[i])) {
-        if (tu.canBulk) upgs[i] = ctn.type === 1 ? upgs[i].max(tu.bulk[i]) : Math.max(upgs[i],tu.bulk[i])
-        else upgs[i] = ctn.type === 1 ? upgs[i].add(1) : upgs[i] + 1
-
-        // p[q] = p[q].sub(getUpgradeCost(upgs[i],ctn,1)).max(0)
-        p[q] = p[q].sub(tu.cost[i])
-
-        updateUpgradesTemp(id)
-    }
-}
-
-function buyMaxUpgrades(id) {
-    for (let y in UPGRADES.ids[id].ctn) buyUpgrade(id,y)
-}
-
-function resetUpgrades(id,reset) {
-    for (let y in UPGRADES.ids[id].ctn) {
-        let ctn = UPGRADES.ids[id].ctn[y]
-        let keep = false
-        if (reset == "quarry" && id == "t_stone") keep = ctn.keep
-        if (reset == "break" && id == "gold") keep = ctn.keep
-        if (!keep) player.upgs[id][y] = ctn.type === 1 ? E(0) : 0
-    }
-}
-
-function getUpgradeCost(plr,upg,max,b=0) {
-    let type = upg.type
-    switch (type) {
-        case 0: // Simple
-            return upg.cost
-        case 1: // Advanced
-            return plr.sub(b).gte(max||EINF) ? EINF : upg.cost(plr.sub(b))
-        case 2: // Custom
-            return plr-b >= upg.cost.length ? EINF : upg.cost[plr-b]
-    }
-}
-
-function bulkUpgrade(res,upg,max) {
-    let type = upg.type
-    switch (type) {
-        case 0: // Simple
-            return res.gte(upg.cost) ? 1 : 0
-        case 1: // Advanced
-            return res.gte(upg.cost(E(0))) ? upg.bulk(res).min(max||EINF) : E(0)
-        case 2: // Custom
-            let x = upg.cost.length
-            for (let i = 0; i < x; i++) if (res.lt(upg.cost[i])) return i;
+        get description() { return `Increase Stone gain by <b>${formatMult(this.base)}</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(2,i.sumBase(1.01).pow(1.2)).mul(10)
             return x
+        },
+        bulk(i) {
+            let x = i.div(10).max(1).log(2).root(1.2).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        get base() { return Decimal.add(isModEnabled("easy") ? 2 : 1.5, upgradeEffect('stone\\2',0)).add(simpleUpgradeEffect("gold\\7",0)) },
+        get strength() { return simpleUpgradeBonus("break\\5",1.1) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    'stone\\2': {
+        get max() { return Decimal.add(10,upgradeEffect("stone\\7",0)) },
+
+        name: `Better Miner`,
+        get description() { return `Increase <b>Miner</b>'s base by <b>+0.15</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.pow(1.5)).mul(100)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(100).max(1).log(10).max(0).root(1.5)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        // get strength() { return simpleUpgradeBonus("stone\\h2",1.5) },
+        effect(i) {
+            let x = i.mul(0.15)
+            return x
+        },
+        effDesc: x => "+"+format(x),
+    },
+    'stone\\3': {
+        unl: () => player.t_stone.unl,
+        name: `Deep Miner`,
+
+        get description() { return `Increase ${tmp.t_stoneName} gain by <b>${formatMult(this.base)}</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(5,i.sumBase(1.01).pow(1.1)).mul(1e4)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e4).max(1).log(5).max(0).root(1.1).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        get base() { return Decimal.add(3, simpleUpgradeBonus('gold\\1',upgradeEffect('t_stone\\2',0),0)) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    'stone\\4': {
+        unl: () => player.t_stone.max.gte(2),
+        name: `Tiered Miner`,
+
+        get description() { return `Increase ${tmp.t_stoneName} gain by <b>${formatMult(this.base)}</b> per level, based on Quarry Tier.` },
+        cost(i) {
+            let x = Decimal.pow(3,i.sumBase(1.01).pow(2)).mul(1e5)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e5).max(1).log(3).max(0).root(2).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        get strength() { return simpleUpgradeBonus("stone\\5",1.5) },
+        get base() { return player.t_stone.max.add(1) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    'stone\\h1': {
+        unl: () => isModEnabled("hard") && player.t_stone.max.gte(5),
+        name: `Soft Stone H`,
+
+        get description() { return `Decrease the strength of ${tmp.t_stoneName} and the requirement of Quarry Tier by <b>0.25</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.sumBase(1.1)).mul(1e9)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e9).max(1).log(10).max(0).sumBase(1.1,true)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        effect(i) {
+            let x = i.mul(.25)
+            return x
+        },
+        effDesc: x => "-"+format(x)+" to Quarry Tier",
+    },
+    'stone\\h2': {
+        unl: () => isModEnabled("hard") && player.t_stone.max.gte(9),
+        name: `Softer Stone H`,
+
+        get description() { return `Increase the divisor of the strength of ${tmp.t_stoneName} based on this level.` },
+        cost(i) {
+            let x = Decimal.pow(1e3,i.sumBase(1.1).pow(1.5)).mul(1e21)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e21).max(1).log(1e3).max(0).root(1.5).sumBase(1.1,true)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        effect(i) {
+            let x = i.mul(.2).add(1).root(2)
+            return x
+        },
+        effDesc: x => formatMult(x.pow(-1),3)+" to Quarry Tier",
+    },
+    'stone\\5': {
+        unl: () => player.t_stone.max.gte(11),
+        max: 1,
+
+        get description() { return `<b>Tiered Miner</b> is <b>50%</b> stronger.` },
+        cost: () => 1e30,
+        curr: "stone",
+    },
+    'stone\\6': {
+        unl: () => player.t_stone.max.gte(19),
+        get max() { return Decimal.add(10,simpleUpgradeBonus("break\\7",upgradeEffect("stone\\7",0),0)) },
+
+        name: `Synergism Miner`,
+        get description() { return `Increase <b>Hard Miner</b>'s base by <b>+25%</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(100,i.pow(1.5)).mul(isModEnabled('hard') ? 1e54 : 1e75)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(isModEnabled('hard') ? 1e54 : 1e75).max(1).log(100).max(0).root(1.5)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        effect(i) {
+            let x = i.mul(0.25).add(1)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    'stone\\h3': {
+        unl: () => isModEnabled("hard") && player.t_stone.max.gte(20),
+        max: 1,
+
+        get description() { return `<b>Tenfold</b> Golden Stone.` },
+        cost: () => 1e60,
+        curr: "stone",
+    },
+    'stone\\7': {
+        max: 20,
+        unl: () => player.t_stone.max.gte(23),
+
+        name: `Better Miner Cap`,
+        get description() { return `Raise <b>Better Miner</b>'s cap by <b>+5</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(1e10,i.add(1).pow(2)).mul(1e100)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e100).max(1).log(1e10).max(0).root(2)
+            return x.floor()
+        },
+        curr: "stone",
+
+        effect(i) {
+            let x = i.mul(5)
+            return x
+        },
+        effDesc: x => "+"+format(x,0),
+    },
+    'stone\\8': {
+        unl: () => player.t_stone.max.gte(26),
+        name: `Antique Stone`,
+
+        get description() { return `Increase your <b>income</b> by <b>${formatMult(this.base)}</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.sumBase(1.01)).mul(1e160)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e160).max(1).log(10).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "stone",
+
+        get base() { return Decimal.add(1.1, 0) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+
+    't_stone\\1': {
+        name: `Hard Miner`,
+
+        get description() { return `Increase ${tmp.t_stoneName} gain by <b>${formatMult(this.base)}</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(3,i.sumBase(1.01).pow(1.1)).mul(100)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(100).max(1).log(3).max(0).root(1.1).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "t_stone",
+
+        get base() { return Decimal.add(2, upgradeEffect('t_stone\\2',0)).mul(upgradeEffect("stone\\6")) },
+        get strength() { return simpleUpgradeBonus("break\\5",1.1) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    't_stone\\2': {
+        max: 10,
+
+        name: `Harder Miner`,
+        get description() { return `Increase <b>Hard Miner</b>'s base by <b>+0.2</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.pow(1.5)).mul(1e3)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e3).max(1).log(10).max(0).root(1.5)
+            return x.add(1).floor()
+        },
+        curr: "t_stone",
+
+        // get strength() { return simpleUpgradeBonus("stone\\h2",1.5) },
+        effect(i) {
+            let x = i.mul(0.2)
+            return x
+        },
+        effDesc: x => "+"+format(x),
+    },
+    't_stone\\3': {
+        unl: () => player.t_stone.tier.gte(3),
+        max: 1,
+        name: `Stone's Tiered Boost`,
+
+        get description() { return `Stone is boosted by unspent ${tmp.t_stoneName}.` },
+        cost: ()=>1e6,
+        curr: "t_stone",
+
+        effect(i) {
+            let x = player.t_stone.stone.add(10).log10().mul(tmp.t_stoneHard).pow(player.t_stone.tier.pow(hasUpgrade("t_stone\\5") ? .85 : .75))
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    't_stone\\4': {
+        unl: () => player.t_stone.tier.gte(8),
+        name: `Soft Stone`,
+
+        get description() { return `Decrease the strength of ${tmp.t_stoneName} by <b>0.2</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(1e3,i.sumBase(1.1)).mul(1e6)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e6).max(1).log(1e3).max(0).sumBase(1.1,true)
+            return x.add(1).floor()
+        },
+        curr: "t_stone",
+
+        effect(i) {
+            let x = i.mul(.2)
+            return x
+        },
+        effDesc: x => "-"+format(x)+" to Quarry Tier",
+    },
+    't_stone\\h1': {
+        unl: () => isModEnabled("hard") && player.t_stone.tier.gte(15),
+        max: 1,
+
+        get description() { return `Stone divides the requirement of Quarry Tier at a reduced rate.` },
+        cost: ()=>1e21,
+        curr: "t_stone",
+
+        effect(i) {
+            let x = expPow(player.stone.add(1),.5)
+            return x
+        },
+        effDesc: x => formatMult(x.pow(-1)),
+    },
+    't_stone\\5': {
+        unl: () => player.t_stone.tier.gte(16),
+        max: 1,
+
+        get description() { return `Improve <b>Stone's Tiered Boost</b>.` },
+        cost: ()=>1e21,
+        curr: "t_stone",
+    },
+    't_stone\\6': {
+        unl: () => player.t_stone.tier.gte(24),
+        max: 1,
+
+        get description() { return `The strength of ${tmp.t_stoneName} is decreased based on your wealth.` },
+        cost: ()=>1e27,
+        curr: "t_stone",
+
+        effect(i) {
+            let x = player.break.money.add(1).log10().div(10)
+            return x
+        },
+        effDesc: x => "-"+format(x,3)+" to Quarry Tier",
+    },
+
+    'gold\\1': {
+        max: 1,
+        name: `Golden Deep`,
+
+        get description() { return `<b>Harder Miner</b> affects <b>Deep Miner</b> linearly.` },
+        cost: ()=>1,
+        curr: "gold",
+    },
+    'gold\\2': {
+        max: 15,
+        name: `Better Golden Effect`,
+
+        get description() { return `Improve the effect of Golden Stone.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.pow(1.25)).mul(1e2)
+            return x.ceil()
+        },
+        bulk(i) {
+            let x = i.div(1e2).max(1).log(10).max(0).root(1.25)
+            return x.add(1).floor()
+        },
+        curr: "gold",
+
+        effect(i) {
+            let x = i
+            return x
+        },
+        effDesc: x => "+"+format(x)+" to the exponent",
+    },
+    'gold\\h1': {
+        name: `Soft Gold`,
+        unl: () => isModEnabled("hard"),
+
+        get description() { return `Decrease the strength of ${tmp.t_stoneName} by <b>0.5</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.sumBase(1.1)).mul(100)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(100).max(1).log(10).max(0).sumBase(1.1,true)
+            return x.add(1).floor()
+        },
+        curr: "gold",
+
+        effect(i) {
+            let x = i.mul(.5)
+            return x
+        },
+        effDesc: x => "-"+format(x)+" to Quarry Tier",
+    },
+    'gold\\3': {
+        max: 2,
+        name: `Newble Automation`,
+
+        get description() { return `<b>[1]</b> Automate <b>Stone Upgrades</b> without spending any resource. <b>[2]</b> Automate <b>Tiered Stone Upgrades</b> too. <subtitle>Note: Any automation or generation will be unlocked in Automation tab.</subtitle>` },
+        cost(i) {
+            return listedCost(i,[1e3,1e4])
+        },
+        bulk(i) {
+            return listedCost(i,[1e3,1e4],true)
+        },
+        curr: "gold",
+    },
+    'gold\\4': {
+        max: 10,
+        name: `Fast Quarry`,
+
+        get description() { return `The requirement of Quarry Tier is decreased by <b>5%</b> compounding per level.` },
+        cost(i) {
+            let x = Decimal.pow(2,i.pow(1.25)).mul(1e3)
+            return x.ceil()
+        },
+        bulk(i) {
+            let x = i.div(1e3).max(1).log(2).max(0).root(1.25)
+            return x.add(1).floor()
+        },
+        curr: "gold",
+
+        effect(i) {
+            let x = i.pow_base(.95)
+            return x
+        },
+        effDesc: x => "-"+formatReduction(x),
+    },
+    'gold\\5': {
+        max: 1,
+        name: `Golden Deep`,
+
+        get description() { return `Increase Golden Stone by <b>${formatMult(this.base)}</b> per the highest Quarry Tier, starting at <b>2</b>.` },
+        cost: ()=>1e5,
+        curr: "gold",
+
+        get base() { return isModEnabled("hard") ? 1.1 : 1.2 },
+        effect(i) {
+            let x = player.t_stone.max.sub(1).pow_base(this.base)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    'gold\\6': {
+        name: `More Gold`,
+
+        get description() { return `Increase Golden Stone by <b>${formatMult(this.base)}</b> per level.` },
+        cost(i) {
+            let x = Decimal.pow(10,i.sumBase(1.01)).mul(1e6)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e6).max(1).log(10).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "gold",
+
+        get base() { return Decimal.add(2, 0) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+    'gold\\7': {
+        max: 1,
+        name: `Golden Miner`,
+
+        get description() { return `Total Golden Stone increases <b>Miner</b>'s base slightly.` },
+        cost: ()=>isModEnabled("hard") ? 1e9 : 1e10,
+        curr: "gold",
+
+        effect(i) {
+            let x = player.gold.total.add(10).log10().root(2).sub(1).div(10)
+            return x
+        },
+        effDesc: x => "+"+format(x,3),
+    },
+    'gold\\h2': {
+        unl: () => isModEnabled("hard") && player.break.unl,
+        max: 1,
+
+        get description() { return `<b>Tenfold</b> Cobblestone.` },
+        cost: () => 1e15,
+        curr: "gold",
+    },
+    'gold\\8': {
+        unl: () => player.break.unl,
+        name: `Worth Gold`,
+
+        get description() { return `Increase your <b>income</b> by <b>${formatMult(this.base)}</b> per level, based on total golden stone.` },
+        cost(i) {
+            let x = Decimal.pow(3,i.sumBase(1.01).pow(1.5)).mul(1e18)
+            return x
+        },
+        bulk(i) {
+            let x = i.div(1e18).max(1).log(3).root(1.5).sumBase(1.01,true)
+            return x.add(1).floor()
+        },
+        curr: "gold",
+
+        get base() { return player.gold.total.add(10).log10().log10().add(1) },
+        effect(i) {
+            let x = this.base.pow(i)
+            return x
+        },
+        effDesc: x => formatMult(x),
+    },
+
+    ...BREAK_UPGRADES,
+}
+
+const UPG_KEYS = Object.keys(UPGRADES)
+
+const UPGRADE_GROUPS = {
+    'stone': [],
+    't_stone': [],
+    'gold': [],
+}
+
+function buyUpgrade(id, mode) {
+    const U = UPGRADES[id]
+    let level = player.upgs[id], max = U.max ?? EINF
+
+    if (!U.unl() || level.gte(max)) return;
+
+    let auto = mode == "auto", bulk = auto || mode == "bulk", curr = CURRENCIES[U.curr], amount = curr.amount, cost = U.cost(level);
+
+    if (amount.gte(cost)) {
+        let n = level.add(1)
+
+        if (bulk && Decimal.gt(max,1)) {
+            n = n.max(U.bulk(amount)).min(max)
+            if (!auto) cost = U.cost(n.sub(1));
+        }
+
+        player.upgs[id] = n
+        if (!auto) curr.amount = amount.sub(cost).max(0);
     }
 }
 
-function upgAmount(id,i) { return player.upgs[id][i] }
+function buyMaxUpgradesByGroup(id, auto) {
+    for (let x of UPGRADE_GROUPS[id]) buyUpgrade(x, auto ? "auto" : "bulk");
+}
 
-function upgEffect(id,i,def=E(1)) { return tmp.upgs[id].eff[i] || def }
+function hasUpgrade(x,lvl=1) { return player.upgs[x].gte(lvl) }
+function upgradeEffect(x,def=1) { return tmp.upg_effect?.[x] ?? def }
+function simpleUpgradeEffect(x,def=1) { return hasUpgrade(x) ? upgradeEffect(x,def) : def }
+function simpleUpgradeBonus(x,y,def=1) { return hasUpgrade(x) ? y : def }
 
-function upgBought(id,i) { return UPGRADES.ids[id].ctn[i].type === 1 ? player.upgs[id][i].gte(1) : player.upgs[id][i] >= 1 }
+function updateUpgradesTemp() {
+    for (let x in UPGRADES) {
+        const U = UPGRADES[x]
 
-function updateUpgradesTemp(id) {
-    let upgs = UPGRADES.ids[id]
+        if ('effect' in U) {
+            let lvl = player.upgs[x].mul(U.strength ?? 1)
 
-    let tu = tmp.upgs[id]
-    let pu = player.upgs[id]
-    let [p, q] = UPGRADES.resource[id]()
-
-    tu.res = p[q]
-    tu.canBulk = upgs.bulk ? upgs.bulk() : false
-
-    for (let y = 0; y < upgs.ctn.length; y++) {
-        let upg = upgs.ctn[y]
-
-        if (upg.max) tu.max[y] = typeof upg.max === 'function' ? upg.max() : upg.max
-        tu.cost[y] = getUpgradeCost(pu[y],upg,tu.max[y])
-        tu.bulk[y] = bulkUpgrade(tu.res,upg,tu.max[y])
-        if (upg.eff) tu.eff[y] = upg.eff(pu[y])
+            tmp.upg_effect[x] = U.effect(lvl);
+        }
     }
 }
 
-tmp_update.push(_=>{
-    for (let x = 0; x < UPG_IDS.length; x++) {
-        updateUpgradesTemp(UPG_IDS[x])
-    }
-})
+function isUpgradeAffordable(id) {
+    let u = UPGRADES[id], lvl = player.upgrades[id];
+    return !u.unl() && lvl.lt(u.max ?? EINF) && CURRENCIES[u.curr].amount.gte(u.cost(lvl))
+}
+
+function resetUpgrades(list=[],keep=[]) {
+    for (let id of list) if (!keep.includes(id)) player.upgs[id] = E(0);
+}
+
+function resetUpgradesByGroup(id,keep) { resetUpgrades(UPGRADE_GROUPS[id],keep) }

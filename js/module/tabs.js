@@ -1,40 +1,73 @@
-const TABS = {
-    choose(id, stab=false) {
-        if (stab) tmp.stab[tmp.tab] = id
-        else if (this.tab[id].req ? this.tab[id].req() : true) tmp.tab = id
+const TAB_DATA = {
+    stone: {
+        name: "Stone / Quarry",
+        res: ()=>`You have <b>${player.stone.format(0)}</b> Stone, <b>${player.t_stone.stone.format(0)}</b> ${tmp.t_stoneName}.`,
+        icon: "images/stone.png",
+    },
+    gold: {
+        name: "Golden Stone",
+        res: ()=>`You have <b>${player.gold.stone.format(0)}</b> Golden Stone.`,
+        req: ()=> player.stone.gte(CURRENCIES.gold.require) || player.gold.unl,
+        reqDesc: ()=> `Reach <b>${format(CURRENCIES.gold.require)}</b> Stone`,
+        icon: "images/gold.png",
+    },
+    cobble: {
+        name: "Break Stone",
+        unl: ()=> player.gold.unl,
+        res: ()=>`You have <b>${player.break.stone.format(0)}</b> Cobblestone.`,
+        req: ()=> player.stone.gte(CURRENCIES.cobble.require) || player.break.unl,
+        reqDesc: ()=> `Reach <b>${format(CURRENCIES.cobble.require)}</b> Stone`,
+        icon: "images/cobblestone.png",
+    },
+    auto: {
+        name: "Automation",
+        unl: ()=> player.gold.unl,
+        icon: "images/automator.png",
     },
 
-    tab_id: ["stone","gold",'cobs',"auto","options"],
-
-    tab: {
-        stone: {
-            title: "Stone / Quarry",
-            res: _=>`You have <b>${player.stone.format(0)}</b> Stone, <b>${player.t_stone.stone.format(0)}</b> ${tmp.t_stoneName}.`,
-            icon: "images/stone.png",
-        },
-        gold: {
-            title: "Golden Stone",
-            res: _=>`You have <b>${player.gold.stone.format(0)}</b> Golden Stone.`,
-            req: _=> player.stone.gte(1e21) || player.gold.unl,
-            reqDesc: _=> `Reach <b>${format(1e21)}</b> Stone to Unlock`,
-            icon: "images/gold.png",
-        },
-        cobs: {
-            title: "Break Stone",
-            unl: _=> player.gold.unl,
-            res: _=>`You have <b>${player.break.stone.format(0)}</b> Cobblestone.`,
-            req: _=> player.stone.gte(1e100) || player.break.unl,
-            reqDesc: _=> `Reach <b>${format(1e100)}</b> Stone to Unlock`,
-            icon: "images/cobblestone.png",
-        },
-        auto: {
-            title: "Automation",
-            unl: _=> player.gold.unl,
-            icon: "images/automator.png",
-        },
-        options: {
-            title: "Options",
-            icon: "images/option.png",
-        },
+    options: {
+        name: "Main Options",
+        icon: "images/option.png",
     },
+    saving: {
+        name: "Saving",
+        icon: "images/save.png",
+    },
+    mods: {
+        name: "Modifiers",
+        icon: "images/mods.png",
+    },
+    changelogs: {
+        name: "Changelogs",
+        icon: "images/changelog.png",
+    },
+}
+
+const TABS = [
+    {
+        stab: "stone",
+    },{
+        stab: "gold",
+    },{
+        stab: "cobble",
+    },{
+        stab: "auto",
+    },{
+        name: "Options",
+        icon: "images/option.png",
+
+        stab: ["options","saving","mods","changelogs"],
+    },
+]
+
+TABS.forEach((x,index) => {x.index = index})
+
+function chooseTab(i,j) {
+    console.log(i,j)
+
+    tmp.tab = i
+    if (j !== undefined) tmp.stab[i] = j;
+
+    const T = TABS[i]
+    if (T) tmp.current_tab = Array.isArray(T.stab) ? T.stab[tmp.stab[i] ?? 0] : T.stab;
 }

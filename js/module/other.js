@@ -6,7 +6,14 @@ function notify(text,type,icon) {
     `
     document.getElementById("notify").appendChild(n)
 
-    setTimeout(_=>{
+    setTimeout(()=>{
         n.remove()
     },6000)
 }
+
+const ICONS = {
+    expand: "&#xe000;",
+    collapse: "&#xe001;",
+}
+
+function icon(id) { return `<icon>${ICONS[id]}</icon>` }
