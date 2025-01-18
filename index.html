@@ -129,7 +129,9 @@
                 <div v-if="tmp.current_tab == 'mods'">
                     <div>
                         <button onclick="createModdedSave()">Start the new Normal/Modified Game</button>
-                    </div><br><div>
+                    </div><br>
+                    <p>Choosing modifiers is not recommended for beginners or who haven't finished or played!</p>
+                    <div>
                         <modifier-slot v-for="x in MOD_KEYS" :id="x"></modifier-slot>
                     </div>
                 </div>
