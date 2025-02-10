@@ -1,21 +1,27 @@
 function updateNewsArray() {
     newsArray = [
-        [_=>"Hello, World!",true,"a1"],
-        [_=>"How are you dawg?",Math.random()<1/3,"a2"],
-        [_=>"🤨",true,"a3"],
-        [_=>"<img src='images/pog.jfif'></img>",true,"a4"],
+        [()=>"Hello, World!",true,"a1"],
+        [()=>"How are you dawg?",Math.random()<1/3,"a2"],
+        [()=>"🤨",true,"a3"],
+        [()=>"<img src='images/pog.jfif'></img>",true,"a4"],
+        [()=>`Hello everybody, my name is Markiplier and welcome to Five Nights at Freddy's, an indie horror game that you guys suggested, en masse, and I saw that Yamimash played it and he said it was really really good... So I'm very eager to see what is up. And that is a terrifying animatronic bear! 'Family pizzeria looking for security guard to work the nightshift.' Oh... 12 a.m. The first night. If I didn't wanna stay the first night, why would I stay any more than... five... Why I stay any more than two- hello? Okay...`,Math.random()<1/10,"a5"],
+        [()=>"5 hours? more like 5 years",true,"a6"],
+        [()=>"I HAVE PLAYED THIS GAME BEFORE!!!!!!!!!!!",true,"a7"],
 
-        [_=>"HOLY COW!! IS THAT A MINECRAFT REFERENCE???",player.t_stone.unl,"b1"],
-        [_=>"Eating a Stone in Ancient Greece be like...",player.t_stone.max >= 2,"b2"],
-        [_=>"Ok and?",player.t_stone.max >= 3,"b3"],
-        [_=>"How are you making 196,246,121,957,436,124,526,772 yoctogramm of uranium?",player.t_stone.max >= 6,"b4"],
-        [_=>"IronStone? More like FeStone :D",player.t_stone.max >= 7,"b5"],
-        [_=>"BREAKING THE DIAMOND??? WTFFFFF",player.t_stone.max >= 14,"b6"],
-        [_=>"Finally, it made of bedrock...",player.t_stone.max >= 15,"b7"],
-        [_=>"Nevermind, bedrock...",player.t_stone.max >= 20,"b8"],
+        [()=>"HOLY COW!! IS THAT A MINECRAFT REFERENCE???",player.t_stone.unl,"b1"],
+        [()=>"Eating a Stone in Ancient Greece be like...",player.t_stone.max >= 2,"b2"],
+        [()=>"Ok, and?",player.t_stone.max >= 3,"b3"],
+        [()=>"How did you make 196,246,121,957,436,124,526,772 yoctogramm of uranium?",player.t_stone.max >= 6,"b4"],
+        [()=>"IronStone? More like FeStone :D",player.t_stone.max >= 7,"b5"],
+        [()=>"BREAKING THE DIAMOND??? WTFFFFF",player.t_stone.max >= 14,"b6"],
+        [()=>"Finally, it made of bedrock...",player.t_stone.max >= 15,"b7"],
+        [()=>"Nevermind, bedrock...",player.t_stone.max >= 20,"b8"],
 
-        [_=>"Gold made in [Au]stralia!",player.gold.unl,"c1"],
-        [_=>"Richer than Trillionaire",player.gold.total.gte(1e6),"c2"],
+        [()=>"Gold made in [Au]stralia!",player.gold.unl,"c1"],
+        [()=>"Richer than Trillionaire",player.gold.total.gte(1e6),"c2"],
+
+        [()=>"I finally took 268,078 years to break the first stone...",player.break.unl,"d1"],
+        [()=>"Coems 🤑🤑🤑🤑🤑",player.break.money.gte(1e6),"d2"],
     ]
 }
 
